@@ -1,0 +1,12 @@
+[project]
+name = "uselessbrowser"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "drissionpage>=4.1.1.2",
+    "spoof>=1.5.3",
+    "PyQt6>=6.6",
+    "pyqt6-fluent-widgets @ git+https://github.com/zhiyiYo/PyQt-Fluent-Widgets.git@PyQt6",
+]
