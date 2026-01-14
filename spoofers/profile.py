@@ -1,7 +1,7 @@
 """
-Профиль спуфинга - единый источник данных для всех модулей
+浏览器指纹/反指纹配置模型与读写逻辑。
 
-Все модули используют этот профиль для консистентного спуфинга.
+包含默认配置、从 IP 生成、随机生成、加载/保存等能力。
 """
 
 import json
@@ -15,9 +15,9 @@ from .ip_timezone import detect_ip_geo, get_system_timezone, IPGeoData
 
 @dataclass
 class SpoofProfile:
-    """Профиль для спуфинга - все параметры в одном месте"""
+    """浏览器指纹配置模型（屏幕/硬件/WebGL/时区/地理位置等）。"""
     
-    # Browser - актуальная версия Chrome (декабрь 2024)
+    # Browser - 基础 UA/平台/厂商信息（默认 Chrome 2024）
     user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     platform: str = "Win32"
     vendor: str = "Google Inc."
@@ -41,7 +41,7 @@ class SpoofProfile:
     
     # Timezone
     timezone: str = "America/New_York"
-    timezone_offset: int = 300  # минуты от UTC
+    timezone_offset: int = 300  # 与 UTC 的分钟差值
     locale: str = "en-US"
     
     # Geolocation
@@ -49,7 +49,7 @@ class SpoofProfile:
     longitude: float = -74.0060
     accuracy: float = 50.0
     
-    # Canvas/Audio noise seed (для консистентного fingerprint)
+    # Canvas/Audio noise seed （用于指纹扰动）
     noise_seed: int = field(default_factory=lambda: random.randint(1, 1000000))
     
     # Fonts
@@ -91,7 +91,7 @@ class SpoofProfile:
 
     
     def to_dict(self) -> dict:
-        """Сериализует профиль в словарь для сохранения"""
+    """序列化为 dict 便于存储。"""
         return {
             'user_agent': self.user_agent,
             'platform': self.platform,
@@ -149,7 +149,7 @@ class SpoofProfile:
     
     @classmethod
     def from_dict(cls, data: dict) -> 'SpoofProfile':
-        """Создаёт профиль из словаря"""
+    """从 dict 反序列化为配置对象。"""
         return cls(
             user_agent=data.get('user_agent', cls.user_agent),
             platform=data.get('platform', cls.platform),
@@ -206,48 +206,48 @@ class SpoofProfile:
         )
 
 
-# Предустановленные профили для разных локаций
-# ВАЖНО: timezone_offset - это минуты ЗАПАДНЕЕ UTC (положительное = запад)
-# getTimezoneOffset() возвращает положительное для западных таймзон
+# timezone_offset 说明：
+# getTimezoneOffset() 返回的是本地时间到 UTC 的分钟差值（本地 - UTC）。
+# 例如 UTC+8 的 offset 是 -480。
 PROFILES = {
     'new_york': SpoofProfile(
         timezone='America/New_York',
-        timezone_offset=300,  # UTC-5 = +300 минут
+        timezone_offset=300,  # UTC-5 = +300 分钟
         locale='en-US',
         latitude=40.7128,
         longitude=-74.0060,
     ),
     'los_angeles': SpoofProfile(
         timezone='America/Los_Angeles',
-        timezone_offset=480,  # UTC-8 = +480 минут
+        timezone_offset=480,  # UTC-8 = +480 分钟
         locale='en-US',
         latitude=34.0522,
         longitude=-118.2437,
     ),
     'chicago': SpoofProfile(
         timezone='America/Chicago',
-        timezone_offset=360,  # UTC-6 = +360 минут
+        timezone_offset=360,  # UTC-6 = +360 分钟
         locale='en-US',
         latitude=41.8781,
         longitude=-87.6298,
     ),
     'london': SpoofProfile(
         timezone='Europe/London',
-        timezone_offset=0,  # UTC+0 = 0 минут
+        timezone_offset=0,  # UTC+0 = 0 分钟
         locale='en-GB',
         latitude=51.5074,
         longitude=-0.1278,
     ),
     'berlin': SpoofProfile(
         timezone='Europe/Berlin',
-        timezone_offset=-60,  # UTC+1 = -60 минут (зима)
+        timezone_offset=-60,  # UTC+1 = -60 分钟
         locale='de-DE',
         latitude=52.5200,
         longitude=13.4050,
     ),
     'tokyo': SpoofProfile(
         timezone='Asia/Tokyo',
-        timezone_offset=-540,  # UTC+9 = -540 минут
+        timezone_offset=-540,  # UTC+9 = -540 分钟
         locale='ja-JP',
         latitude=35.6762,
         longitude=139.6503,
@@ -256,24 +256,19 @@ PROFILES = {
 
 
 def generate_profile_from_ip() -> Optional[SpoofProfile]:
-    """
-    Генерирует профиль на основе IP геолокации.
-    
-    Timezone и координаты берутся из IP, остальное рандомизируется.
-    Это важно чтобы timezone совпадал с IP!
-    """
+    """根据 IP 地理位置生成配置（时区/语言/经纬度等）。"""
     geo = detect_ip_geo()
     if not geo:
         return None
     
     print(f"[PROFILE] Detected IP geo: {geo.city}, {geo.country} ({geo.timezone})")
     
-    # Случайное разрешение экрана
+    # 随机分辨率与任务栏高度
     resolutions = [(1920, 1080), (1366, 768), (1536, 864), (1440, 900), (1280, 720)]
     screen_width, screen_height = random.choice(resolutions)
     taskbar_height = random.choice([40, 48, 30])
     
-    # Случайный WebGL
+    # 随机 WebGL 配置
     webgl_configs = [
         ("Google Inc. (NVIDIA)", "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0, D3D11)"),
         ("Google Inc. (NVIDIA)", "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)"),
@@ -282,7 +277,7 @@ def generate_profile_from_ip() -> Optional[SpoofProfile]:
     ]
     webgl_vendor, webgl_renderer = random.choice(webgl_configs)
     
-    # Актуальные версии Chrome
+    # 随机 Chrome 版本
     chrome_versions = ['131.0.0.0', '130.0.0.0', '129.0.0.0']
     chrome_version = random.choice(chrome_versions)
     user_agent = f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version} Safari/537.36"
@@ -312,30 +307,24 @@ def generate_profile_from_ip() -> Optional[SpoofProfile]:
 
 
 def generate_random_profile() -> SpoofProfile:
-    """
-    Генерирует профиль спуфинга.
-    
-    Приоритет:
-    1. По IP геолокации (timezone совпадает с IP)
-    2. Fallback на случайный US профиль
-    """
-    # Сначала пробуем по IP
+    """随机生成配置：优先使用 IP 生成，失败则回退到内置默认。"""
+    # 先尝试 IP 生成
     profile = generate_profile_from_ip()
     if profile:
         return profile
     
     print("[PROFILE] IP geo failed, using random US profile")
     
-    # Fallback на случайный US профиль
+    # IP 失败则回退到内置美国默认
     us_profiles = ['new_york', 'los_angeles', 'chicago']
     base = PROFILES[random.choice(us_profiles)]
     
-    # Случайное разрешение экрана
+    # 随机分辨率与任务栏高度
     resolutions = [(1920, 1080), (1366, 768), (1536, 864), (1440, 900), (1280, 720)]
     screen_width, screen_height = random.choice(resolutions)
     taskbar_height = random.choice([40, 48, 30])
     
-    # Случайный WebGL
+    # 随机 WebGL 配置
     webgl_configs = [
         ("Google Inc. (NVIDIA)", "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0, D3D11)"),
         ("Google Inc. (NVIDIA)", "ANGLE (NVIDIA, NVIDIA GeForce GTX 1660 SUPER Direct3D11 vs_5_0 ps_5_0, D3D11)"),
@@ -344,7 +333,7 @@ def generate_random_profile() -> SpoofProfile:
     ]
     webgl_vendor, webgl_renderer = random.choice(webgl_configs)
     
-    # Актуальные версии Chrome
+    # 随机 Chrome 版本
     chrome_versions = ['131.0.0.0', '130.0.0.0', '129.0.0.0']
     chrome_version = random.choice(chrome_versions)
     user_agent = f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version} Safari/537.36"
@@ -373,7 +362,7 @@ def generate_random_profile() -> SpoofProfile:
     )
 
 
-# === Сохранение/загрузка профиля ===
+# === 配置文件读写 ===
 
 
 def get_profiles_dir() -> Path:
@@ -384,18 +373,14 @@ def get_profiles_dir() -> Path:
 
 
 def get_profile_path(email: str) -> Path:
-    """圾抉戒志把忘投忘快找 扭批找抆 抗 扳忘抄抖批 扭把抉扳我抖攸 忱抖攸 email"""
+    """将 email 转成安全文件名并返回配置路径。"""
     profiles_dir = get_profiles_dir()
-    # 妒扼扭抉抖抆戒批快技 email 抗忘抗 我技攸 扳忘抄抖忘 (戒忘技快扶攸快技 @ 我 .)
+    # 替换 @ 和 . 以避免文件名冲突
     safe_name = email.replace('@', '_at_').replace('.', '_')
     return profiles_dir / f'{safe_name}.json'
 
 def save_profile(email: str, profile: SpoofProfile) -> bool:
-    """
-    Сохраняет профиль спуфинга для аккаунта.
-    
-    Вызывается после успешной регистрации.
-    """
+    """保存配置到文件。"""
     try:
         path = get_profile_path(email)
         data = profile.to_dict()
@@ -413,11 +398,7 @@ def save_profile(email: str, profile: SpoofProfile) -> bool:
 
 
 def load_profile(email: str) -> Optional[SpoofProfile]:
-    """
-    Загружает сохранённый профиль для аккаунта.
-    
-    Используется при работе с токеном для консистентности fingerprint.
-    """
+    """从文件加载配置。"""
     try:
         path = get_profile_path(email)
         if not path.exists():
@@ -435,12 +416,7 @@ def load_profile(email: str) -> Optional[SpoofProfile]:
 
 
 def get_or_create_profile(email: str = None) -> SpoofProfile:
-    """
-    Получает профиль для email или создаёт новый.
-    
-    Если email указан и профиль существует - загружает его.
-    Иначе генерирует новый.
-    """
+    """按 email 加载配置，未命中则生成随机配置。"""
     if email:
         profile = load_profile(email)
         if profile:

@@ -330,37 +330,50 @@ def build_profiles_page(window) -> None:
     form.addRow(window.label_profile_browser, window.profile_browser_combo)
 
     window.field_timezone = LineEdit()
-    window.field_timezone.setReadOnly(True)
+    window.field_timezone.setReadOnly(False)
+    window.field_timezone.editingFinished.connect(
+        lambda: window._on_profile_text_changed('timezone', window.field_timezone)
+    )
     window.label_timezone = QtWidgets.QLabel()
     form.addRow(window.label_timezone, window.field_timezone)
 
     window.field_locale = LineEdit()
-    window.field_locale.setReadOnly(True)
+    window.field_locale.setReadOnly(False)
+    window.field_locale.editingFinished.connect(
+        lambda: window._on_profile_text_changed('locale', window.field_locale)
+    )
     window.label_locale = QtWidgets.QLabel()
     form.addRow(window.label_locale, window.field_locale)
 
     window.field_screen = LineEdit()
-    window.field_screen.setReadOnly(True)
+    window.field_screen.setReadOnly(False)
+    window.field_screen.editingFinished.connect(window._on_profile_screen_changed)
     window.label_screen = QtWidgets.QLabel()
     form.addRow(window.label_screen, window.field_screen)
 
     window.field_pixel_ratio = LineEdit()
-    window.field_pixel_ratio.setReadOnly(True)
+    window.field_pixel_ratio.setReadOnly(False)
+    window.field_pixel_ratio.editingFinished.connect(window._on_profile_pixel_ratio_changed)
     window.label_pixel_ratio = QtWidgets.QLabel()
     form.addRow(window.label_pixel_ratio, window.field_pixel_ratio)
 
     window.field_hardware = LineEdit()
-    window.field_hardware.setReadOnly(True)
+    window.field_hardware.setReadOnly(False)
+    window.field_hardware.editingFinished.connect(window._on_profile_hardware_changed)
     window.label_hardware = QtWidgets.QLabel()
     form.addRow(window.label_hardware, window.field_hardware)
 
     window.field_webgl = LineEdit()
-    window.field_webgl.setReadOnly(True)
+    window.field_webgl.setReadOnly(False)
+    window.field_webgl.editingFinished.connect(
+        lambda: window._on_profile_text_changed('webgl_renderer', window.field_webgl)
+    )
     window.label_webgl = QtWidgets.QLabel()
     form.addRow(window.label_webgl, window.field_webgl)
 
     window.field_geo = LineEdit()
-    window.field_geo.setReadOnly(True)
+    window.field_geo.setReadOnly(False)
+    window.field_geo.editingFinished.connect(window._on_profile_geo_changed)
     window.label_geo = QtWidgets.QLabel()
     form.addRow(window.label_geo, window.field_geo)
 
