@@ -23,6 +23,18 @@ jobs:
           pip install .
           pip install nuitka
           pip install zstandard
+      - name: Prepare data directories
+        run: |
+          if (-not (Test-Path "config")) { New-Item -ItemType Directory -Path "config" | Out-Null }
+          if (-not (Test-Path "profiles")) { New-Item -ItemType Directory -Path "profiles" | Out-Null }
+          if (-not (Test-Path "config/app.json")) {
+            @'
+          {
+            "language": "system",
+            "theme": "auto"
+          }
+          '@ | Set-Content -Path "config/app.json" -Encoding UTF8
+          }
       - name: Build executable
         run: |
           $root = $env:GITHUB_WORKSPACE
