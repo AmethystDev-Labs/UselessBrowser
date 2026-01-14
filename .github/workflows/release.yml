@@ -25,14 +25,15 @@ jobs:
           pip install zstandard
       - name: Build executable
         run: |
+          $root = $env:GITHUB_WORKSPACE
           python -m nuitka `
             --onefile `
             --windows-disable-console `
             --output-filename=UselessBrowser.exe `
-            --include-data-dir=./config=config `
-            --include-data-dir=./i18n=i18n `
-            --include-data-dir=./profiles=profiles `
-            --include-data-dir=./docs=docs `
+            --include-data-dir="$root\config=config" `
+            --include-data-dir="$root\i18n=i18n" `
+            --include-data-dir="$root\profiles=profiles" `
+            --include-data-dir="$root\docs=docs" `
             main.py
       - name: Package artifact
         run: |
