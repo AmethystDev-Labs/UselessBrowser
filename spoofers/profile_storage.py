@@ -8,7 +8,7 @@ Profile Storage - сохранение и загрузка профилей сп
 import json
 from pathlib import Path
 from typing import Optional
-from .profile import SpoofProfile, get_profiles_dir
+from .profile import BaseConfig, ProfileConfig, PROFILE_SCHEMA_VERSION, SpoofProfile, get_profiles_dir
 
 
 class ProfileStorage:
@@ -31,7 +31,14 @@ class ProfileStorage:
         """Сохраняет профиль для аккаунта"""
         try:
             path = self._get_profile_path(email)
-            data = profile.to_dict()
+            stored = ProfileConfig(
+                base_config=BaseConfig(profile_id=email, adapter_id='chromium'),
+                extra_config=profile.to_dict(),
+                profile_schema_version=PROFILE_SCHEMA_VERSION,
+            )
+            data = stored.to_dict()
+            data['email'] = email
+            data['saved_at'] = __import__('datetime').datetime.now().isoformat()
             path.write_text(json.dumps(data, indent=2), encoding='utf-8')
             return True
         except Exception as e:
@@ -45,7 +52,10 @@ class ProfileStorage:
             if not path.exists():
                 return None
             data = json.loads(path.read_text(encoding='utf-8'))
-            return SpoofProfile.from_dict(data)
+            if isinstance(data, dict) and data.get('profile_schema_version') == PROFILE_SCHEMA_VERSION:
+                extra = data.get('extra_config') or {}
+                return SpoofProfile.from_dict(extra)
+            return SpoofProfile.from_dict(data if isinstance(data, dict) else {})
         except Exception as e:
             print(f"[ProfileStorage] Failed to load: {e}")
             return None

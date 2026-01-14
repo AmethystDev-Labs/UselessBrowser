@@ -35,7 +35,7 @@ def build_chromium_options(profile_id: str, browser_path: Optional[str] = None) 
     co.set_argument('--disable-dev-shm-usage')
 
     try:
-        from registration.browser import find_chrome_path, BROWSER_ARGS
+        from app.browser_library import find_chrome_path, BROWSER_ARGS
 
         chrome_path = browser_path or find_chrome_path()
         if chrome_path:

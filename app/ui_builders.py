@@ -316,163 +316,51 @@ def build_profiles_page(window) -> None:
     window.label_profile_id = QtWidgets.QLabel()
     form.addRow(window.label_profile_id, window.field_profile_id)
 
-    window.field_user_agent = LineEdit()
-    window.field_user_agent.setReadOnly(False)
-    window.field_user_agent.editingFinished.connect(
-        lambda: window._on_profile_text_changed('user_agent', window.field_user_agent)
+    window.adapter_id_combo = ComboBox()
+    window.adapter_id_combo.currentIndexChanged.connect(window._on_base_adapter_changed)
+    window.adapter_id_combo.currentIndexChanged.connect(
+        lambda i: window._log_settings(f'Adapter combo signal: index={i} data={window.adapter_id_combo.itemData(i)}')
     )
-    window.label_user_agent = QtWidgets.QLabel()
-    form.addRow(window.label_user_agent, window.field_user_agent)
+    window.label_adapter_id = QtWidgets.QLabel('Adapter')
+    form.addRow(window.label_adapter_id, window.adapter_id_combo)
 
     window.profile_browser_combo = ComboBox()
-    window.profile_browser_combo.currentIndexChanged.connect(window._on_profile_browser_changed)
+    window.profile_browser_combo.currentIndexChanged.connect(window._on_base_browser_changed)
     window.label_profile_browser = QtWidgets.QLabel()
     form.addRow(window.label_profile_browser, window.profile_browser_combo)
 
-    window.field_timezone = LineEdit()
-    window.field_timezone.setReadOnly(False)
-    window.field_timezone.editingFinished.connect(
-        lambda: window._on_profile_text_changed('timezone', window.field_timezone)
-    )
-    window.label_timezone = QtWidgets.QLabel()
-    form.addRow(window.label_timezone, window.field_timezone)
+    window.field_target_url = LineEdit()
+    window.field_target_url.setReadOnly(False)
+    window.field_target_url.setPlaceholderText('https://example.com')
+    window.field_target_url.editingFinished.connect(window._on_base_target_url_changed)
+    window.label_target_url = QtWidgets.QLabel('Target URL')
+    form.addRow(window.label_target_url, window.field_target_url)
 
-    window.field_locale = LineEdit()
-    window.field_locale.setReadOnly(False)
-    window.field_locale.editingFinished.connect(
-        lambda: window._on_profile_text_changed('locale', window.field_locale)
-    )
-    window.label_locale = QtWidgets.QLabel()
-    form.addRow(window.label_locale, window.field_locale)
-
-    window.field_screen = LineEdit()
-    window.field_screen.setReadOnly(False)
-    window.field_screen.editingFinished.connect(window._on_profile_screen_changed)
-    window.label_screen = QtWidgets.QLabel()
-    form.addRow(window.label_screen, window.field_screen)
-
-    window.field_pixel_ratio = LineEdit()
-    window.field_pixel_ratio.setReadOnly(False)
-    window.field_pixel_ratio.editingFinished.connect(window._on_profile_pixel_ratio_changed)
-    window.label_pixel_ratio = QtWidgets.QLabel()
-    form.addRow(window.label_pixel_ratio, window.field_pixel_ratio)
-
-    window.field_hardware = LineEdit()
-    window.field_hardware.setReadOnly(False)
-    window.field_hardware.editingFinished.connect(window._on_profile_hardware_changed)
-    window.label_hardware = QtWidgets.QLabel()
-    form.addRow(window.label_hardware, window.field_hardware)
-
-    window.field_webgl = LineEdit()
-    window.field_webgl.setReadOnly(False)
-    window.field_webgl.editingFinished.connect(
-        lambda: window._on_profile_text_changed('webgl_renderer', window.field_webgl)
-    )
-    window.label_webgl = QtWidgets.QLabel()
-    form.addRow(window.label_webgl, window.field_webgl)
-
-    window.field_geo = LineEdit()
-    window.field_geo.setReadOnly(False)
-    window.field_geo.editingFinished.connect(window._on_profile_geo_changed)
-    window.label_geo = QtWidgets.QLabel()
-    form.addRow(window.label_geo, window.field_geo)
+    window.field_proxy = LineEdit()
+    window.field_proxy.setReadOnly(False)
+    window.field_proxy.setPlaceholderText('http://host:port')
+    window.field_proxy.editingFinished.connect(window._on_base_proxy_changed)
+    window.label_proxy = QtWidgets.QLabel('Proxy')
+    form.addRow(window.label_proxy, window.field_proxy)
 
     details_layout.addWidget(details_form_container)
     config_layout.addWidget(window.details_card)
 
-    window.protection_header = StrongBodyLabel('')
-    config_layout.addWidget(window.protection_header)
-    window.protection_card = SimpleCardWidget()
-    protection_layout = QtWidgets.QVBoxLayout(window.protection_card)
-    protection_layout.setContentsMargins(16, 12, 16, 16)
-    protection_layout.setSpacing(10)
-    protection_form_container = QtWidgets.QWidget()
-    protection_form = QtWidgets.QFormLayout(protection_form_container)
-    protection_form.setVerticalSpacing(12)
-    protection_form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+    window.extra_header = StrongBodyLabel('Extra Config')
+    config_layout.addWidget(window.extra_header)
 
-    window.switch_webrtc = SwitchButton('Off')
-    window.switch_webrtc.setOnText('On')
-    window.switch_webrtc.checkedChanged.connect(window._on_protection_changed)
-    window.label_webrtc = QtWidgets.QLabel()
-    protection_form.addRow(window.label_webrtc, window.switch_webrtc)
+    window.extra_card = SimpleCardWidget()
+    extra_layout = QtWidgets.QVBoxLayout(window.extra_card)
+    extra_layout.setContentsMargins(16, 12, 16, 16)
+    extra_layout.setSpacing(10)
 
-    window.switch_canvas = SwitchButton('Off')
-    window.switch_canvas.setOnText('On')
-    window.switch_canvas.checkedChanged.connect(window._on_protection_changed)
-    window.label_canvas = QtWidgets.QLabel()
-    protection_form.addRow(window.label_canvas, window.switch_canvas)
+    window.extra_form_container = QtWidgets.QWidget()
+    window.extra_form = QtWidgets.QFormLayout(window.extra_form_container)
+    window.extra_form.setVerticalSpacing(10)
+    window.extra_form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+    extra_layout.addWidget(window.extra_form_container)
 
-    window.switch_webgl = SwitchButton('Off')
-    window.switch_webgl.setOnText('On')
-    window.switch_webgl.checkedChanged.connect(window._on_protection_changed)
-    window.label_webgl_protect = QtWidgets.QLabel()
-    protection_form.addRow(window.label_webgl_protect, window.switch_webgl)
-
-    window.switch_audio = SwitchButton('Off')
-    window.switch_audio.setOnText('On')
-    window.switch_audio.checkedChanged.connect(window._on_protection_changed)
-    window.label_audio = QtWidgets.QLabel()
-    protection_form.addRow(window.label_audio, window.switch_audio)
-
-    window.switch_fonts = SwitchButton('Off')
-    window.switch_fonts.setOnText('On')
-    window.switch_fonts.checkedChanged.connect(window._on_protection_changed)
-    window.label_fonts = QtWidgets.QLabel()
-    protection_form.addRow(window.label_fonts, window.switch_fonts)
-
-    window.switch_geolocation = SwitchButton('Off')
-    window.switch_geolocation.setOnText('On')
-    window.switch_geolocation.checkedChanged.connect(window._on_protection_changed)
-    window.label_geolocation = QtWidgets.QLabel()
-    protection_form.addRow(window.label_geolocation, window.switch_geolocation)
-
-    window.switch_timezone = SwitchButton('Off')
-    window.switch_timezone.setOnText('On')
-    window.switch_timezone.checkedChanged.connect(window._on_protection_changed)
-    window.label_timezone_protect = QtWidgets.QLabel()
-    protection_form.addRow(window.label_timezone_protect, window.switch_timezone)
-
-    window.switch_client_hints = SwitchButton('Off')
-    window.switch_client_hints.setOnText('On')
-    window.switch_client_hints.checkedChanged.connect(window._on_protection_changed)
-    window.label_client_hints = QtWidgets.QLabel()
-    protection_form.addRow(window.label_client_hints, window.switch_client_hints)
-
-    window._protection_switches = [
-        window.switch_webrtc,
-        window.switch_canvas,
-        window.switch_webgl,
-        window.switch_audio,
-        window.switch_fonts,
-        window.switch_geolocation,
-        window.switch_timezone,
-        window.switch_client_hints,
-    ]
-
-    protection_layout.addWidget(protection_form_container)
-    config_layout.addWidget(window.protection_card)
-
-    window.fingerprint_header = StrongBodyLabel('')
-    config_layout.addWidget(window.fingerprint_header)
-    window.fingerprint_card = SimpleCardWidget()
-    fingerprint_layout = QtWidgets.QVBoxLayout(window.fingerprint_card)
-    fingerprint_layout.setContentsMargins(16, 12, 16, 16)
-    fingerprint_layout.setSpacing(10)
-    fingerprint_form_container = QtWidgets.QWidget()
-    fingerprint_form = QtWidgets.QFormLayout(fingerprint_form_container)
-    fingerprint_form.setVerticalSpacing(10)
-    fingerprint_form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-
-    window.combo_webrtc_mode = ComboBox()
-    window.combo_webrtc_mode.currentIndexChanged.connect(
-        lambda idx: window._on_profile_combo_changed('webrtc_mode', window.combo_webrtc_mode)
-    )
-    window.label_webrtc_mode = QtWidgets.QLabel()
-    fingerprint_form.addRow(window.label_webrtc_mode, window.combo_webrtc_mode)
-
-    fingerprint_layout.addWidget(fingerprint_form_container)
-    config_layout.addWidget(window.fingerprint_card)
+    config_layout.addWidget(window.extra_card)
     config_layout.addStretch(1)
     root_layout.addWidget(right_panel, 2)
 

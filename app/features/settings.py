@@ -32,160 +32,214 @@ class SettingsMixin:
                 self._theme_listener.wait(1500)
 
     def _apply_language(self) -> None:
+        def set_text(attr: str, text: str) -> None:
+            widget = getattr(self, attr, None)
+            if widget is not None:
+                widget.setText(text)
+
         self.setWindowTitle(self._t('window_title'))
-        self.home_greeting_body.setText(self._format_greeting())
-        self.home_title.setText(self._t('home_title'))
-        self.home_subtitle.setText(self._t('home_subtitle'))
-        self.home_quick_label.setText(self._t('home_quick_actions'))
-        self.home_profile_label.setText(self._t('home_profile_title'))
-        self.home_launch_btn.setText(self._t('home_go_launch'))
-        self.home_profiles_btn.setText(self._t('home_manage_profiles'))
-        self.home_tips_label.setText(self._t('home_tips_title'))
-        self.home_tips_body.setText(self._t('home_tips_body'))
-        self.home_edit_btn.setToolTip(
-            self._t('home_edit_done') if self._home_edit_mode else self._t('home_edit')
-        )
-        self.home_add_card_btn.setToolTip(self._t('home_add_card'))
+        set_text('home_greeting_body', self._format_greeting())
+        set_text('home_title', self._t('home_title'))
+        set_text('home_subtitle', self._t('home_subtitle'))
+        set_text('home_quick_label', self._t('home_quick_actions'))
+        set_text('home_profile_label', self._t('home_profile_title'))
+        set_text('home_launch_btn', self._t('home_go_launch'))
+        set_text('home_profiles_btn', self._t('home_manage_profiles'))
+        set_text('home_tips_label', self._t('home_tips_title'))
+        set_text('home_tips_body', self._t('home_tips_body'))
+        if getattr(self, 'home_edit_btn', None) is not None:
+            self.home_edit_btn.setToolTip(
+                self._t('home_edit_done') if self._home_edit_mode else self._t('home_edit')
+            )
+        if getattr(self, 'home_add_card_btn', None) is not None:
+            self.home_add_card_btn.setToolTip(self._t('home_add_card'))
 
-        self.launch_title.setText(self._t('launch_title'))
-        self.launch_subtitle.setText(self._t('launch_subtitle'))
-        self.launch_group_title.setText(self._t('launch_settings'))
-        self.launch_label_profile.setText(self._t('launch_current_profile'))
-        self.launch_label_url.setText(self._t('launch_target_url'))
-        self.open_btn.setText(self._t('launch_open_browser'))
-        self.launch_profiles_btn.setText(self._t('launch_select_profile'))
-        if self.launch_profile_combo.currentIndex() < 0:
-            self.launch_profile_combo.setPlaceholderText(self._t('launch_profile_placeholder'))
+        set_text('launch_title', self._t('launch_title'))
+        set_text('launch_subtitle', self._t('launch_subtitle'))
+        set_text('launch_group_title', self._t('launch_settings'))
+        set_text('launch_label_profile', self._t('launch_current_profile'))
+        set_text('launch_label_url', self._t('launch_target_url'))
+        set_text('open_btn', self._t('launch_open_browser'))
+        set_text('launch_profiles_btn', self._t('launch_select_profile'))
+        if getattr(self, 'launch_profile_combo', None) is not None:
+            if self.launch_profile_combo.currentIndex() < 0:
+                self.launch_profile_combo.setPlaceholderText(self._t('launch_profile_placeholder'))
 
-        self.profiles_title.setText(self._t('profiles_title'))
-        self.actions_label.setText(self._t('profiles_actions'))
-        self.new_random_btn.setText(self._t('profiles_new_random'))
-        self.new_ip_btn.setText(self._t('profiles_new_from_ip'))
-        self.delete_btn.setText(self._t('profiles_delete'))
-        self.refresh_btn.setText(self._t('profiles_refresh'))
-        self.details_header.setText(self._t('profiles_details'))
-        self.protection_header.setText(self._t('profiles_protection'))
+        set_text('profiles_title', self._t('profiles_title'))
+        set_text('actions_label', self._t('profiles_actions'))
+        set_text('new_random_btn', self._t('profiles_new_random'))
+        set_text('new_ip_btn', self._t('profiles_new_from_ip'))
+        set_text('delete_btn', self._t('profiles_delete'))
+        set_text('refresh_btn', self._t('profiles_refresh'))
+        set_text('details_header', self._t('profiles_details'))
+        set_text('protection_header', self._t('profiles_protection'))
+        set_text('fingerprint_header', self._t('profiles_fingerprint_title'))
 
-        self.label_profile_id.setText(self._t('field_profile_id'))
-        self.label_user_agent.setText(self._t('field_user_agent'))
-        self.label_profile_browser.setText(self._t('field_profile_browser'))
-        self.label_timezone.setText(self._t('field_timezone'))
-        self.label_locale.setText(self._t('field_locale'))
-        self.label_screen.setText(self._t('field_screen'))
-        self.label_pixel_ratio.setText(self._t('field_pixel_ratio'))
-        self.label_hardware.setText(self._t('field_hardware'))
-        self.label_webgl.setText(self._t('field_webgl'))
-        self.label_geo.setText(self._t('field_geo'))
-        self.label_webrtc.setText(self._t('protect_webrtc'))
-        self.label_canvas.setText(self._t('protect_canvas'))
-        self.label_webgl_protect.setText(self._t('protect_webgl'))
-        self.label_audio.setText(self._t('protect_audio'))
-        self.label_fonts.setText(self._t('protect_fonts'))
-        self.label_geolocation.setText(self._t('protect_geolocation'))
-        self.label_timezone_protect.setText(self._t('protect_timezone'))
-        self.label_client_hints.setText(self._t('protect_client_hints'))
+        set_text('label_profile_id', self._t('field_profile_id'))
+        set_text('label_user_agent', self._t('field_user_agent'))
+        set_text('label_profile_browser', self._t('field_profile_browser'))
+        set_text('label_timezone', self._t('field_timezone'))
+        set_text('label_locale', self._t('field_locale'))
+        set_text('label_screen', self._t('field_screen'))
+        set_text('label_pixel_ratio', self._t('field_pixel_ratio'))
+        set_text('label_hardware', self._t('field_hardware'))
+        set_text('label_webgl', self._t('field_webgl'))
+        set_text('label_geo', self._t('field_geo'))
+        set_text('label_webrtc_mode', self._t('field_webrtc_mode'))
+        set_text('label_webrtc', self._t('protect_webrtc'))
+        set_text('label_canvas', self._t('protect_canvas'))
+        set_text('label_webgl_protect', self._t('protect_webgl'))
+        set_text('label_audio', self._t('protect_audio'))
+        set_text('label_fonts', self._t('protect_fonts'))
+        set_text('label_geolocation', self._t('protect_geolocation'))
+        set_text('label_timezone_protect', self._t('protect_timezone'))
+        set_text('label_client_hints', self._t('protect_client_hints'))
 
-        self.settings_title.setText(self._t('settings_title'))
-        self.settings_subtitle.setText(self._t('settings_subtitle'))
-        self.settings_group_title.setText(self._t('settings_title'))
-        self.settings_label_language.setText(self._t('settings_language'))
-        self.settings_label_theme.setText(self._t('settings_theme'))
-        self.settings_onboarding_btn.setText(self._t('settings_onboarding'))
+        set_text('settings_title', self._t('settings_title'))
+        set_text('settings_subtitle', self._t('settings_subtitle'))
+        set_text('settings_group_title', self._t('settings_title'))
+        set_text('settings_label_language', self._t('settings_language'))
+        set_text('settings_label_theme', self._t('settings_theme'))
+        set_text('settings_onboarding_btn', self._t('settings_onboarding'))
 
-        self.onboarding_welcome_title.setText(self._t('onboarding_title'))
-        self.onboarding_welcome_body.setText(self._t('onboarding_body'))
-        self.onboarding_install_title.setText(self._t('onboarding_install_title'))
-        self.onboarding_install_desc.setText(self._t('onboarding_install_body'))
-        self.onboarding_install_version_label.setText(self._t('install_browser_version'))
-        self.onboarding_install_btn.setText(self._t('install_browser_action'))
-        self.onboarding_init_title.setText(self._t('onboarding_init_title'))
-        self.onboarding_init_desc.setText(self._t('onboarding_init_body'))
-        self.onboarding_init_btn.setText(self._t('onboarding_init_action'))
-        self.onboarding_back_btn.setText(self._t('onboarding_back'))
-        self.onboarding_next_btn.setText(self._t('onboarding_next'))
-        self.onboarding_exit_btn.setText(self._t('onboarding_exit'))
+        set_text('onboarding_welcome_title', self._t('onboarding_title'))
+        set_text('onboarding_welcome_body', self._t('onboarding_body'))
+        set_text('onboarding_install_title', self._t('onboarding_install_title'))
+        set_text('onboarding_install_desc', self._t('onboarding_install_body'))
+        set_text('onboarding_install_version_label', self._t('install_browser_version'))
+        set_text('onboarding_install_btn', self._t('install_browser_action'))
+        set_text('onboarding_init_title', self._t('onboarding_init_title'))
+        set_text('onboarding_init_desc', self._t('onboarding_init_body'))
+        set_text('onboarding_init_btn', self._t('onboarding_init_action'))
+        set_text('onboarding_back_btn', self._t('onboarding_back'))
+        set_text('onboarding_next_btn', self._t('onboarding_next'))
+        set_text('onboarding_exit_btn', self._t('onboarding_exit'))
 
-        self.nav_home.setText(self._t('nav_home'))
-        self.nav_launch.setText(self._t('nav_launch'))
-        self.nav_profiles.setText(self._t('nav_profiles'))
-        self.nav_browser_library.setText(self._t('nav_browser_library'))
-        self.nav_install_browser.setText(self._t('nav_install_browser'))
-        self.nav_settings.setText(self._t('nav_settings'))
+        set_text('nav_home', self._t('nav_home'))
+        set_text('nav_launch', self._t('nav_launch'))
+        set_text('nav_profiles', self._t('nav_profiles'))
+        set_text('nav_browser_library', self._t('nav_browser_library'))
+        set_text('nav_install_browser', self._t('nav_install_browser'))
+        set_text('nav_settings', self._t('nav_settings'))
 
-        self.browser_library_title.setText(self._t('browser_library_title'))
-        self.browser_library_subtitle.setText(self._t('browser_library_subtitle'))
-        self.browser_library_group_title.setText(self._t('browser_library_group_title'))
-        self.browser_library_refresh_btn.setText(self._t('browser_library_refresh'))
-        self.browser_library_install_btn.setText(self._t('browser_library_install_button'))
+        set_text('browser_library_title', self._t('browser_library_title'))
+        set_text('browser_library_subtitle', self._t('browser_library_subtitle'))
+        set_text('browser_library_group_title', self._t('browser_library_group_title'))
+        set_text('browser_library_refresh_btn', self._t('browser_library_refresh'))
+        set_text('browser_library_install_btn', self._t('browser_library_install_button'))
 
-        self.install_browser_title.setText(self._t('install_browser_title'))
-        self.install_browser_subtitle.setText(self._t('install_browser_subtitle'))
-        self.install_browser_group_title.setText(self._t('install_browser_group_title'))
-        self.install_label_version.setText(self._t('install_browser_version'))
-        self.install_browser_btn.setText(self._t('install_browser_action'))
+        set_text('install_browser_title', self._t('install_browser_title'))
+        set_text('install_browser_subtitle', self._t('install_browser_subtitle'))
+        set_text('install_browser_group_title', self._t('install_browser_group_title'))
+        set_text('install_label_version', self._t('install_browser_version'))
+        set_text('install_browser_btn', self._t('install_browser_action'))
 
         self._refresh_settings_options()
-        self._refresh_fingerprint_controls_options()
-        self._populate_profile_browser_combo(
-            self._current_profile.browser_id if self._current_profile else None
-        )
+        if getattr(self, '_refresh_fingerprint_controls_options', None) is not None and getattr(self, 'fingerprint_header', None) is not None:
+            self._refresh_fingerprint_controls_options()
+
+        selected_path = None
+        if self._current_profile:
+            try:
+                selected_path = self._current_profile.base_config.browser_path
+            except Exception:
+                selected_path = getattr(self._current_profile, 'browser_id', None)
+        if getattr(self, '_populate_profile_browser_combo', None) is not None:
+            self._populate_profile_browser_combo(selected_path)
         self._update_home_profile_hint()
         self._register_palette_targets()
         self._apply_palette_overrides()
 
     def _register_palette_targets(self) -> None:
-        self._palette_labels = [
-            self.home_greeting_body,
-            self.home_title,
-            self.home_subtitle,
-            self.home_quick_label,
-            self.home_profile_label,
-            self.home_profile_hint,
-            self.home_tips_label,
-            self.home_tips_body,
-            self.launch_group_title,
-            self.launch_label_profile,
-            self.launch_label_url,
-            self.label_profile_id,
-            self.label_user_agent,
-            self.label_timezone,
-            self.label_locale,
-            self.label_screen,
-            self.label_pixel_ratio,
-            self.label_hardware,
-            self.label_webgl,
-            self.label_geo,
-            self.label_webrtc,
-            self.label_canvas,
-            self.label_webgl_protect,
-            self.label_audio,
-            self.label_fonts,
-            self.label_geolocation,
-            self.label_timezone_protect,
-            self.label_client_hints,
-            self.protection_header,
-            self.fingerprint_header,
-            self.label_webrtc_mode,
-            self.settings_group_title,
-            self.settings_label_language,
-            self.settings_label_theme,
-            self.browser_library_title,
-            self.browser_library_subtitle,
-            self.browser_library_group_title,
-            self.install_browser_title,
-            self.install_browser_subtitle,
-            self.install_browser_group_title,
-            self.install_label_version,
-            self.label_profile_browser,
+        names = [
+            'home_greeting_body',
+            'home_title',
+            'home_subtitle',
+            'home_quick_label',
+            'home_profile_label',
+            'home_profile_hint',
+            'home_tips_label',
+            'home_tips_body',
+            'launch_group_title',
+            'launch_label_profile',
+            'launch_label_url',
+            'label_profile_id',
+            'label_user_agent',
+            'label_timezone',
+            'label_locale',
+            'label_screen',
+            'label_pixel_ratio',
+            'label_hardware',
+            'label_webgl',
+            'label_geo',
+            'label_webrtc',
+            'label_canvas',
+            'label_webgl_protect',
+            'label_audio',
+            'label_fonts',
+            'label_geolocation',
+            'label_timezone_protect',
+            'label_client_hints',
+            'protection_header',
+            'fingerprint_header',
+            'label_webrtc_mode',
+            'settings_group_title',
+            'settings_label_language',
+            'settings_label_theme',
+            'browser_library_title',
+            'browser_library_subtitle',
+            'browser_library_group_title',
+            'install_browser_title',
+            'install_browser_subtitle',
+            'install_browser_group_title',
+            'install_label_version',
+            'label_profile_browser',
+            'label_adapter_id',
+            'label_target_url',
+            'label_proxy',
+            'extra_header',
         ]
+        labels = []
+        for name in names:
+            widget = getattr(self, name, None)
+            if widget is not None:
+                labels.append(widget)
+        self._palette_labels = labels
         self._palette_group_boxes = []
 
     def _apply_palette_overrides(self) -> None:
         label_style = 'color: palette(windowText);'
+        input_style = 'color: palette(text);'
         if self._is_dark_theme_active():
             label_style = 'color: #f2f2f2;'
+            input_style = 'color: #f2f2f2;'
         for label in self._palette_labels:
             label.setStyleSheet(label_style)
+
+        roots = [
+            getattr(self, 'profiles_content', None),
+            getattr(self, 'profiles_page', None),
+            getattr(self, 'launch_page', None),
+            getattr(self, 'home_page', None),
+            getattr(self, 'browser_library_page', None),
+            getattr(self, 'install_browser_page', None),
+            getattr(self, 'settings_page', None),
+            getattr(self, 'onboarding_page', None),
+        ]
+        for root in roots:
+            if root is None:
+                continue
+            for label in root.findChildren(QtWidgets.QLabel):
+                label.setStyleSheet(label_style)
+            for spin in root.findChildren(QtWidgets.QSpinBox):
+                spin.setStyleSheet(input_style)
+            for spin in root.findChildren(QtWidgets.QDoubleSpinBox):
+                spin.setStyleSheet(input_style)
+            for edit in root.findChildren(QtWidgets.QDateEdit):
+                edit.setStyleSheet(input_style)
+            for edit in root.findChildren(QtWidgets.QTimeEdit):
+                edit.setStyleSheet(input_style)
+
         group_style = (
             'QGroupBox { border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; }'
             if self._is_dark_theme_active()

@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 print = functools.partial(print, flush=True)
 
 # Импортируем спуфинг
-from spoof import apply_pre_navigation_spoofing
+from spoofers.cdp_spoofer import apply_pre_navigation_spoofing
 from spoofers.behavior import BehaviorSpoofModule
 from spoofers.profile_storage import ProfileStorage
 
