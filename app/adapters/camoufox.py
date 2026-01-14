@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from app.adapters.base import BrowserAdapter, FieldSchema, LaunchResult, ValidationError
-from spoofers.profile import get_profiles_dir
-from spoofers.profile import BaseConfig, SpoofProfile
+from app.spoofers.profile import get_profiles_dir
+from app.spoofers.profile import BaseConfig, SpoofProfile
 
 
 class _CamoufoxHandle:

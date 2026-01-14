@@ -27,7 +27,7 @@ from app.features.launch import LaunchMixin
 from app.features.browser_library import BrowserLibraryMixin
 from app.features.install_browser import InstallBrowserMixin
 from app.features.onboarding import OnboardingMixin
-from spoofers.profile import ProfileConfig
+from app.spoofers.profile import ProfileConfig
 
 
 class MainWindow(

@@ -6,7 +6,7 @@ from qfluentwidgets import InfoBar, InfoBarPosition, MessageBox, RoundMenu
 
 from app.browser_library import load_browser_library, remove_local_browser
 from app.profile_utils import list_profile_entries
-from spoofers.profile import load_profile
+from app.spoofers.profile import load_profile
 
 
 class BrowserLibraryMixin:

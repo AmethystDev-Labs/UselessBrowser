@@ -12,15 +12,15 @@ from DrissionPage import ChromiumPage, ChromiumOptions
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 # Force unbuffered output for real-time logging
 print = functools.partial(print, flush=True)
 
 # Импортируем спуфинг
-from spoofers.cdp_spoofer import apply_pre_navigation_spoofing
-from spoofers.behavior import BehaviorSpoofModule
-from spoofers.profile_storage import ProfileStorage
+from app.spoofers.cdp_spoofer import apply_pre_navigation_spoofing
+from app.spoofers.behavior import BehaviorSpoofModule
+from app.spoofers.profile_storage import ProfileStorage
 
 # Debug recorder
 from core.debug_recorder import get_recorder, record, init_recorder

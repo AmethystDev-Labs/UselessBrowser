@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets
 from qfluentwidgets import InfoBar, InfoBarPosition
 
 from app.workers import BrowserLaunchWorker
-from spoofers.profile import load_profile
+from app.spoofers.profile import load_profile
 
 
 def resolve_effective_profile_id(

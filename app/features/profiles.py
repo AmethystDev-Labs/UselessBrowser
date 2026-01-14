@@ -7,7 +7,7 @@ from app.adapters.base import FieldSchema
 from app.adapters.registry import REGISTRY, get_adapter, list_adapters
 from app.features.dialogs import ProfileIdDialog
 from app.profile_utils import list_profile_entries
-from spoofers.profile import (
+from app.spoofers.profile import (
     BaseConfig,
     ProfileConfig,
     build_default_profile_config,

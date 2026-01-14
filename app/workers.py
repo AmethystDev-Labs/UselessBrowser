@@ -6,7 +6,7 @@ from PyQt6 import QtCore
 from app.browser_library import fetch_known_good_versions, install_chrome_download
 from urllib.error import URLError
 import json
-from spoofers.profile import ProfileConfig, BaseConfig
+from app.spoofers.profile import ProfileConfig, BaseConfig
 
 
 class BrowserLaunchWorker(QtCore.QThread):

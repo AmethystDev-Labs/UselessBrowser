@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.adapters.registry import get_adapter
-from spoofers.profile import build_default_profile_config, BaseConfig
+from app.spoofers.profile import build_default_profile_config, BaseConfig
 from app.features.launch import resolve_effective_profile_id
 
 def test_chromium_adapter_schema():

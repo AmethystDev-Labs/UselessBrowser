@@ -5,9 +5,9 @@ from DrissionPage import ChromiumOptions, ChromiumPage
 
 from app.adapters.base import BrowserAdapter, FieldSchema, LaunchResult, ValidationError
 from app.browser_library import BROWSER_ARGS, find_chrome_path
-from spoofers.profile import get_profiles_dir
-from spoofers.cdp_spoofer import apply_pre_navigation_spoofing
-from spoofers.profile import BaseConfig, SpoofProfile
+from app.spoofers.profile import get_profiles_dir
+from app.spoofers.cdp_spoofer import apply_pre_navigation_spoofing
+from app.spoofers.profile import BaseConfig, SpoofProfile
 
 
 class ChromiumAdapter(BrowserAdapter):

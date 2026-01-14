@@ -3,7 +3,7 @@ from typing import Optional
 
 from DrissionPage import ChromiumOptions
 
-from spoofers.profile import get_profiles_dir
+from app.spoofers.profile import get_profiles_dir
 
 
 def list_profile_entries() -> list[dict]:
