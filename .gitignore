@@ -13,3 +13,6 @@ wheels/
 profiles/
 browsers/
 config/
+.trae/documents/生成项目完整文档 (PROJECT_DOCS.md).md
+.gitignore
+PROJECT_DOCS.md
