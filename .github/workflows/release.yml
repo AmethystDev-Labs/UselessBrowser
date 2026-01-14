@@ -29,10 +29,10 @@ jobs:
             --onefile `
             --windows-disable-console `
             --output-filename=UselessBrowser.exe `
-            --include-data-dir=config=config `
-            --include-data-dir=i18n=i18n `
-            --include-data-dir=profiles=profiles `
-            --include-data-dir=docs=docs `
+            --include-data-dir=./config=config `
+            --include-data-dir=./i18n=i18n `
+            --include-data-dir=./profiles=profiles `
+            --include-data-dir=./docs=docs `
             main.py
       - name: Package artifact
         run: |
