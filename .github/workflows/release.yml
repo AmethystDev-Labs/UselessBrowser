@@ -43,6 +43,8 @@ jobs:
             --onefile `
             --windows-console-mode=disable `
             --assume-yes-for-downloads `
+            --enable-plugin=pyqt6 `
+            --include-qt-plugins=platforms `
             --output-filename=UselessBrowser.exe `
             --include-data-dir="$root\config=config" `
             --include-data-dir="$root\i18n=i18n" `
