@@ -40,7 +40,8 @@ jobs:
           $root = $env:GITHUB_WORKSPACE
           python -m nuitka `
             --onefile `
-            --windows-disable-console `
+            --windows-console-mode=disable `
+            --assume-yes-for-downloads `
             --output-filename=UselessBrowser.exe `
             --include-data-dir="$root\config=config" `
             --include-data-dir="$root\i18n=i18n" `
