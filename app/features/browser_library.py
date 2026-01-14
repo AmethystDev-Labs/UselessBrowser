@@ -20,7 +20,7 @@ class BrowserLibraryMixin:
             item.setData(QtCore.Qt.ItemDataRole.UserRole, entry.id)
             self.browser_library_list.addItem(item)
         self._populate_profile_browser_combo(
-            self._current_profile.browser_id if self._current_profile else None
+            self._current_profile.base_config.browser_path if self._current_profile else None
         )
 
     def _show_browser_library_menu(self, position: QtCore.QPoint) -> None:
@@ -95,9 +95,9 @@ class BrowserLibraryMixin:
         used_by = []
         for entry in list_profile_entries():
             profile = load_profile(entry['id'])
-            if not profile or not profile.browser_id:
+            if not profile or not profile.base_config.browser_path:
                 continue
-            if self._normalize_browser_id(profile.browser_id) == normalized:
+            if self._normalize_browser_id(profile.base_config.browser_path) == normalized:
                 used_by.append(entry['id'])
         return used_by
 
@@ -144,14 +144,20 @@ class BrowserLibraryMixin:
         self.refresh_browser_library()
 
     def _resolve_browser_path(self, profile) -> Optional[str]:
-        if profile.browser_id:
+        browser_path = None
+        try:
+            browser_path = profile.base_config.browser_path
+        except Exception:
+            browser_path = getattr(profile, 'browser_id', None)
+
+        if browser_path:
             try:
-                if Path(profile.browser_id).exists():
-                    return profile.browser_id
+                if Path(str(browser_path)).exists():
+                    return str(browser_path)
             except Exception:
                 pass
             for entry in self._browser_entries:
-                if entry.id == profile.browser_id:
+                if entry.id == browser_path or str(entry.path) == browser_path:
                     return str(entry.path)
         if self._browser_entries:
             return str(self._browser_entries[0].path)

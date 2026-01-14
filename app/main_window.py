@@ -1,7 +1,6 @@
-from typing import Optional
+from typing import Optional, Any
 
 from PyQt6 import QtWidgets
-from DrissionPage import ChromiumPage
 
 from qfluentwidgets import FluentWindow
 from qfluentwidgets.common.translator import FluentTranslator
@@ -28,7 +27,7 @@ from app.features.launch import LaunchMixin
 from app.features.browser_library import BrowserLibraryMixin
 from app.features.install_browser import InstallBrowserMixin
 from app.features.onboarding import OnboardingMixin
-from spoofers.profile import SpoofProfile
+from spoofers.profile import ProfileConfig
 
 
 class MainWindow(
@@ -61,9 +60,9 @@ class MainWindow(
         self.setWindowTitle(self._t('window_title'))
         self.resize(1000, 650)
         self.setMinimumSize(520, 360)
-        self._pages: list[ChromiumPage] = []
+        self._pages: list[Any] = []
         self._current_profile_id: Optional[str] = None
-        self._current_profile: Optional[SpoofProfile] = None
+        self._current_profile: Optional[ProfileConfig] = None
         self._launch_worker: Optional[BrowserLaunchWorker] = None
         self._browser_versions_worker: Optional[BrowserVersionsWorker] = None
         self._browser_install_worker: Optional[BrowserInstallWorker] = None

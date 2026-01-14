@@ -8,9 +8,59 @@ import json
 import random
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from .ip_timezone import detect_ip_geo, get_system_timezone, IPGeoData
+
+
+PROFILE_SCHEMA_VERSION = 1
+
+
+@dataclass
+class BaseConfig:
+    profile_id: str
+    adapter_id: str = 'chromium'
+    browser_path: Optional[str] = None
+    target_url: str = ''
+    user_data_dir: Optional[str] = None
+    proxy: Optional[Any] = None
+
+    def to_dict(self) -> dict:
+        return {
+            'profile_id': self.profile_id,
+            'adapter_id': self.adapter_id,
+            'browser_path': self.browser_path,
+            'target_url': self.target_url,
+            'user_data_dir': self.user_data_dir,
+            'proxy': self.proxy,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict, profile_id_fallback: str) -> 'BaseConfig':
+        profile_id = data.get('profile_id') or profile_id_fallback
+        return cls(
+            profile_id=profile_id,
+            adapter_id=data.get('adapter_id', 'chromium'),
+            browser_path=data.get('browser_path'),
+            target_url=data.get('target_url', ''),
+            user_data_dir=data.get('user_data_dir'),
+            proxy=data.get('proxy'),
+        )
+
+
+@dataclass
+class ProfileConfig:
+    base_config: BaseConfig
+    extra_config: dict = field(default_factory=dict)
+    profile_schema_version: int = PROFILE_SCHEMA_VERSION
+
+    def to_dict(self) -> dict:
+        return {
+            'profile_schema_version': self.profile_schema_version,
+            'adapter_id': self.base_config.adapter_id,
+            'base_config': self.base_config.to_dict(),
+            'extra_config': self.extra_config,
+        }
 
 
 @dataclass
@@ -88,10 +138,9 @@ class SpoofProfile:
     geo_mode: str = 'ip'
     resolution_mode: str = 'system'
     fonts_mode: str = 'system'
-
     
     def to_dict(self) -> dict:
-        """序列化为 dict 便于存储。"""
+        """序列化为 dict，便于保存。"""
         return {
             'user_agent': self.user_agent,
             'platform': self.platform,
@@ -379,47 +428,92 @@ def get_profile_path(email: str) -> Path:
     safe_name = email.replace('@', '_at_').replace('.', '_')
     return profiles_dir / f'{safe_name}.json'
 
-def save_profile(email: str, profile: SpoofProfile) -> bool:
-    """保存配置到文件。"""
+
+def _now_iso() -> str:
+    return __import__('datetime').datetime.now().isoformat()
+
+
+def _migrate_legacy_profile(profile_id: str, data: dict) -> ProfileConfig:
+    adapter_id = data.get('adapter_id') or data.get('adapter_type') or 'chromium'
+
+    browser_path = None
+    legacy_browser = data.get('browser_path') or data.get('browser_id')
+    if isinstance(legacy_browser, str) and legacy_browser.strip():
+        browser_path = legacy_browser
+
+    base_config = BaseConfig(
+        profile_id=profile_id,
+        adapter_id=adapter_id,
+        browser_path=browser_path,
+        target_url=data.get('target_url', ''),
+        user_data_dir=data.get('user_data_dir'),
+        proxy=data.get('proxy'),
+    )
+
+    if adapter_id == 'chromium':
+        extra_profile = SpoofProfile.from_dict(data)
+        extra_config = extra_profile.to_dict()
+    else:
+        extra_config = data.get('extra_config') or {}
+
+    return ProfileConfig(base_config=base_config, extra_config=extra_config)
+
+
+def save_profile(profile_id: str, profile: ProfileConfig) -> bool:
+    """保存 ProfileConfig 到文件（BaseConfig + ExtraConfig）。"""
     try:
-        path = get_profile_path(email)
+        path = get_profile_path(profile_id)
         data = profile.to_dict()
-        data['email'] = email
-        data['saved_at'] = __import__('datetime').datetime.now().isoformat()
+        data['email'] = profile_id
+        data['saved_at'] = _now_iso()
         
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
         
-        print(f"[PROFILE] Saved fingerprint for {email}")
+        print(f"[PROFILE] Saved profile for {profile_id}")
         return True
     except Exception as e:
         print(f"[PROFILE] Failed to save: {e}")
         return False
 
 
-def load_profile(email: str) -> Optional[SpoofProfile]:
-    """从文件加载配置。"""
+def load_profile(profile_id: str) -> Optional[ProfileConfig]:
+    """从文件加载 ProfileConfig；自动迁移旧格式。"""
     try:
-        path = get_profile_path(email)
+        path = get_profile_path(profile_id)
         if not path.exists():
             return None
         
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
-        profile = SpoofProfile.from_dict(data)
-        print(f"[PROFILE] Loaded fingerprint for {email}")
-        return profile
+
+        if isinstance(data, dict) and data.get('profile_schema_version') == PROFILE_SCHEMA_VERSION:
+            base = BaseConfig.from_dict(data.get('base_config') or {}, profile_id)
+            extra = data.get('extra_config') or {}
+            profile = ProfileConfig(base_config=base, extra_config=extra, profile_schema_version=PROFILE_SCHEMA_VERSION)
+            print(f"[PROFILE] Loaded profile for {profile_id}")
+            return profile
+
+        migrated = _migrate_legacy_profile(profile_id, data if isinstance(data, dict) else {})
+        print(f"[PROFILE] Loaded legacy profile for {profile_id}")
+        return migrated
     except Exception as e:
         print(f"[PROFILE] Failed to load: {e}")
         return None
 
 
-def get_or_create_profile(email: str = None) -> SpoofProfile:
-    """按 email 加载配置，未命中则生成随机配置。"""
-    if email:
-        profile = load_profile(email)
-        if profile:
-            return profile
-    
-    return generate_random_profile()
+def load_profile_as_spoof_profile(profile_id: str) -> Optional[SpoofProfile]:
+    profile = load_profile(profile_id)
+    if not profile:
+        return None
+    return SpoofProfile.from_dict(profile.extra_config or {})
+
+
+def build_default_profile_config(profile_id: str, adapter_id: str = 'chromium') -> ProfileConfig:
+    base_config = BaseConfig(profile_id=profile_id, adapter_id=adapter_id)
+    extra_config: dict
+    if adapter_id == 'chromium':
+        extra_config = generate_random_profile().to_dict()
+    else:
+        extra_config = {}
+    return ProfileConfig(base_config=base_config, extra_config=extra_config)

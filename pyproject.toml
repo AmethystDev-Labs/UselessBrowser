@@ -9,4 +9,5 @@ dependencies = [
     "spoof>=1.5.3",
     "PyQt6>=6.6",
     "pyqt6-fluent-widgets @ git+https://github.com/zhiyiYo/PyQt-Fluent-Widgets.git@PyQt6",
+    "camoufox[geoip]>=0.4.11",
 ]

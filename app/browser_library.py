@@ -14,6 +14,10 @@ KNOWN_GOOD_VERSIONS_URL = (
     'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json'
 )
 
+BROWSER_ARGS = [
+    '--disable-dev-shm-usage',
+]
+
 
 @dataclass
 class BrowserEntry:
@@ -161,6 +165,23 @@ def dedupe_entries(entries: Iterable[BrowserEntry]) -> list[BrowserEntry]:
 def load_browser_library() -> list[BrowserEntry]:
     entries = scan_local_browsers() + scan_system_browsers()
     return dedupe_entries(entries)
+
+
+def find_chrome_path() -> Optional[str]:
+    """Finds the best available Chrome/Chromium executable path."""
+    entries = scan_system_browsers()
+    if not entries:
+        entries = scan_local_browsers()
+    
+    # Prefer Chrome over others, or just pick the first one
+    for entry in entries:
+        if 'Chrome' in entry.name:
+            return str(entry.path)
+    
+    if entries:
+        return str(entries[0].path)
+        
+    return None
 
 
 def remove_local_browser(entry: BrowserEntry, browsers_dir: Optional[Path] = None) -> Path:
