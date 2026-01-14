@@ -39,6 +39,47 @@ class ProfilesMixin:
         values = re.findall(r'[-+]?\d*\.?\d+', text)
         return [float(value) for value in values if value not in ('', '.', '-', '+')]
 
+    def _get_field_label(self, key: str) -> str:
+        labels = {
+            'user_agent': self._t('field_user_agent'),
+            'timezone': self._t('field_timezone'),
+            'locale': self._t('field_locale'),
+            'webgl_renderer': self._t('field_webgl'),
+        }
+        return labels.get(key, key)
+
+    def _show_invalid_profile_dialog(self, field_label: str, reason: str, demo: str) -> None:
+        dialog = MessageBox(
+            self._t('info_invalid_profile_title'),
+            self._t('info_invalid_profile_body').format(field=field_label, reason=reason, demo=demo),
+            self,
+        )
+        dialog.exec()
+
+    def _validate_text_field(self, key: str, value: str) -> tuple[bool, str, str]:
+        if key == 'user_agent':
+            if not value or 'Mozilla/5.0' not in value or 'Chrome/' not in value:
+                return (
+                    False,
+                    self._t('invalid_reason_user_agent'),
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                    '(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                )
+        elif key == 'timezone':
+            if not re.match(r'^[A-Za-z_]+/[A-Za-z_]+(?:/[A-Za-z_]+)?$', value or ''):
+                return False, self._t('invalid_reason_timezone'), 'America/New_York'
+        elif key == 'locale':
+            if not re.match(r'^[a-z]{2}(?:-[A-Z]{2})?$', value or ''):
+                return False, self._t('invalid_reason_locale'), 'en-US'
+        elif key == 'webgl_renderer':
+            if not value:
+                return (
+                    False,
+                    self._t('invalid_reason_webgl'),
+                    'ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11)',
+                )
+        return True, '', ''
+
     def _persist_profile(self) -> None:
         if self._current_profile_id and not save_profile(self._current_profile_id, self._current_profile):
             InfoBar.error(
@@ -82,6 +123,13 @@ class ProfilesMixin:
         if self._updating_profile_controls or not self._current_profile:
             return
         value = edit.text().strip()
+        ok, reason, demo = self._validate_text_field(key, value)
+        if not ok:
+            self._show_invalid_profile_dialog(self._get_field_label(key), reason, demo)
+            self._updating_profile_controls = True
+            edit.setText(getattr(self._current_profile, key) or '')
+            self._updating_profile_controls = False
+            return
         self._update_profile_field(key, value)
 
     def _on_profile_int_changed(self, key: str, edit) -> None:
@@ -152,12 +200,22 @@ class ProfilesMixin:
             return
         values = self._parse_two_ints(self.field_screen.text())
         if not values:
+            self._show_invalid_profile_dialog(
+                self._t('field_screen'),
+                self._t('invalid_reason_screen'),
+                '1920 x 1080',
+            )
             self._updating_profile_controls = True
             self.field_screen.setText(self._format_screen_label(self._current_profile))
             self._updating_profile_controls = False
             return
         width, height = values
         if width <= 0 or height <= 0:
+            self._show_invalid_profile_dialog(
+                self._t('field_screen'),
+                self._t('invalid_reason_screen'),
+                '1920 x 1080',
+            )
             self._updating_profile_controls = True
             self.field_screen.setText(self._format_screen_label(self._current_profile))
             self._updating_profile_controls = False
@@ -178,12 +236,22 @@ class ProfilesMixin:
             return
         values = self._parse_floats(self.field_pixel_ratio.text())
         if not values:
+            self._show_invalid_profile_dialog(
+                self._t('field_pixel_ratio'),
+                self._t('invalid_reason_pixel_ratio'),
+                '1.00',
+            )
             self._updating_profile_controls = True
             self.field_pixel_ratio.setText(self._format_pixel_ratio_label(self._current_profile))
             self._updating_profile_controls = False
             return
         ratio = values[0]
         if ratio <= 0:
+            self._show_invalid_profile_dialog(
+                self._t('field_pixel_ratio'),
+                self._t('invalid_reason_pixel_ratio'),
+                '1.00',
+            )
             self._updating_profile_controls = True
             self.field_pixel_ratio.setText(self._format_pixel_ratio_label(self._current_profile))
             self._updating_profile_controls = False
@@ -199,12 +267,22 @@ class ProfilesMixin:
             return
         values = self._parse_two_ints(self.field_hardware.text())
         if not values:
+            self._show_invalid_profile_dialog(
+                self._t('field_hardware'),
+                self._t('invalid_reason_hardware'),
+                '8 / 8 GB',
+            )
             self._updating_profile_controls = True
             self.field_hardware.setText(self._format_hardware_label(self._current_profile))
             self._updating_profile_controls = False
             return
         hardware, memory = values
         if hardware <= 0 or memory <= 0:
+            self._show_invalid_profile_dialog(
+                self._t('field_hardware'),
+                self._t('invalid_reason_hardware'),
+                '8 / 8 GB',
+            )
             self._updating_profile_controls = True
             self.field_hardware.setText(self._format_hardware_label(self._current_profile))
             self._updating_profile_controls = False
@@ -221,6 +299,11 @@ class ProfilesMixin:
             return
         values = self._parse_floats(self.field_geo.text())
         if len(values) < 2:
+            self._show_invalid_profile_dialog(
+                self._t('field_geo'),
+                self._t('invalid_reason_geo'),
+                '40.7128, -74.0060 (50m)',
+            )
             self._updating_profile_controls = True
             self.field_geo.setText(self._format_geo_label(self._current_profile))
             self._updating_profile_controls = False
@@ -229,6 +312,16 @@ class ProfilesMixin:
         accuracy = self._current_profile.accuracy
         if len(values) >= 3:
             accuracy = values[2]
+        if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+            self._show_invalid_profile_dialog(
+                self._t('field_geo'),
+                self._t('invalid_reason_geo'),
+                '40.7128, -74.0060 (50m)',
+            )
+            self._updating_profile_controls = True
+            self.field_geo.setText(self._format_geo_label(self._current_profile))
+            self._updating_profile_controls = False
+            return
         self._current_profile.latitude = latitude
         self._current_profile.longitude = longitude
         self._current_profile.accuracy = accuracy

@@ -91,7 +91,7 @@ class SpoofProfile:
 
     
     def to_dict(self) -> dict:
-    """序列化为 dict 便于存储。"""
+        """序列化为 dict 便于存储。"""
         return {
             'user_agent': self.user_agent,
             'platform': self.platform,
@@ -149,7 +149,7 @@ class SpoofProfile:
     
     @classmethod
     def from_dict(cls, data: dict) -> 'SpoofProfile':
-    """从 dict 反序列化为配置对象。"""
+        """从 dict 反序列化为配置对象。"""
         return cls(
             user_agent=data.get('user_agent', cls.user_agent),
             platform=data.get('platform', cls.platform),
