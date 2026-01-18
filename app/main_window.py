@@ -1,12 +1,11 @@
 from typing import Optional, Any
 
-from PyQt6 import QtWidgets
-
+from PyQt6 import QtWidgets, QtGui, QtCore
 from qfluentwidgets import FluentWindow
 from qfluentwidgets.common.translator import FluentTranslator
 from qfluentwidgets.common.theme_listener import SystemThemeListener
 
-from app.app_config import DEFAULT_APP_SETTINGS, resolve_language_code
+from app.app_config import DEFAULT_APP_SETTINGS, resolve_language_code, resolve_theme_mode
 from app.ui_strings import UI_STRINGS
 from app.ui_builders import (
     build_home_page,
@@ -18,6 +17,10 @@ from app.ui_builders import (
     build_install_browser_page,
     build_navigation,
 )
+from app.ui_glass_styles import get_glass_stylesheet
+from app.background_manager import GlassBackground
+from app.glass_widgets import GlassCardWidget, GlassButton
+from app.glass_effect import FrostedGlassWidget, apply_frosted_glass
 from app.workers import BrowserInstallWorker, BrowserLaunchWorker, BrowserVersionsWorker
 from app.features.base import AppLogMixin
 from app.features.home import HomeMixin
@@ -54,8 +57,10 @@ class MainWindow(
         self._palette_labels: list[QtWidgets.QLabel] = []
         self._palette_group_boxes: list[QtWidgets.QGroupBox] = []
 
+        self._setup_glass_window()
         self._apply_fluent_translator()
         self._apply_theme(self._theme_mode, save=False)
+        self._apply_glass_style()
 
         self.setWindowTitle(self._t('window_title'))
         self.resize(1000, 650)
@@ -91,6 +96,38 @@ class MainWindow(
         self._apply_palette_overrides()
         self._maybe_start_onboarding()
 
+        self._background_widget = GlassBackground(self, theme='dark')
+        self._background_widget.setGeometry(0, 0, self.width(), self.height())
+        self._background_widget.lower()
+
+    def _setup_glass_window(self) -> None:
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, False)
+        self.setStyleSheet("""
+            QMainWindow {
+                background: transparent;
+            }
+        """)
+
+    def _apply_glass_style(self) -> None:
+        theme = resolve_theme_mode(self._theme_mode)
+        theme_str = 'dark' if theme.value == 'dark' else 'light'
+        glass_style = get_glass_stylesheet(theme)
+        self.setStyleSheet(glass_style)
+        if hasattr(self, '_background_widget'):
+            self._background_widget.set_theme(theme_str)
+        if hasattr(self, 'navigationInterface'):
+            self.navigationInterface.setStyleSheet(
+                'QFrame#navigationWidget { background-color: rgba(20, 20, 30, 180); border: none; border-right: 1px solid rgba(255, 255, 255, 20); }'
+                if theme.value == 'dark' else
+                'QFrame#navigationWidget { background-color: rgba(245, 245, 250, 180); border: none; border-right: 1px solid rgba(0, 0, 0, 15); }'
+            )
+
+    def _on_system_theme_changed(self, theme) -> None:
+        if self._theme_mode == 'auto':
+            self._apply_theme('auto', save=False)
+            self._apply_glass_style()
+
     def _build_ui(self) -> None:
         build_home_page(self)
         build_launch_page(self)
@@ -100,6 +137,11 @@ class MainWindow(
         build_settings_page(self)
         build_onboarding_page(self)
         build_navigation(self)
+
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(event)
+        if hasattr(self, '_background_widget'):
+            self._background_widget.resize(self.width(), self.height())
 
     def _t(self, key: str) -> str:
         return self._strings.get(key, key)

@@ -17,11 +17,20 @@ from qfluentwidgets import (
 from app.home_cards import CardFlowContainer, DraggableCard
 from qfluentwidgets.components.widgets.card_widget import SimpleCardWidget
 from qfluentwidgets import FluentIcon as FIF
+from app.ui_glass_styles import get_glass_stylesheet, GLASS_DARK_STYLESHEET, GLASS_LIGHT_STYLESHEET
+from app.app_config import resolve_theme_mode
+from qfluentwidgets.common import Theme
+from app.glass_widgets import GlassCardWidget, GlassButton, apply_glass_style
+
+
+def _apply_glass_card_style(widget: QtWidgets.QWidget, blur_radius: float = 15.0):
+    apply_glass_style(widget, blur_radius)
 
 
 def build_home_page(window) -> None:
     window.home_page = QtWidgets.QWidget()
     window.home_page.setObjectName('homePage')
+    window.home_page.setProperty('page', True)
     home_layout = QtWidgets.QVBoxLayout(window.home_page)
     home_layout.setContentsMargins(24, 24, 24, 24)
     home_layout.setSpacing(12)
@@ -69,6 +78,7 @@ def build_home_page(window) -> None:
 
     window.home_greeting_card = DraggableCard('greeting')
     window.home_greeting_card.setFixedWidth(360)
+    _apply_glass_card_style(window.home_greeting_card, blur_radius=20.0)
     greeting_layout = QtWidgets.QVBoxLayout(window.home_greeting_card)
     greeting_layout.setContentsMargins(16, 14, 16, 14)
     greeting_layout.setSpacing(8)
@@ -90,6 +100,7 @@ def build_home_page(window) -> None:
 
     window.home_profile_card = DraggableCard('profile')
     window.home_profile_card.setFixedWidth(360)
+    _apply_glass_card_style(window.home_profile_card, blur_radius=20.0)
     profile_layout = QtWidgets.QVBoxLayout(window.home_profile_card)
     profile_layout.setContentsMargins(16, 14, 16, 14)
     profile_layout.setSpacing(8)
@@ -123,6 +134,7 @@ def build_home_page(window) -> None:
 
     window.home_tips_card = DraggableCard('tips')
     window.home_tips_card.setFixedWidth(360)
+    _apply_glass_card_style(window.home_tips_card, blur_radius=20.0)
     tips_layout = QtWidgets.QVBoxLayout(window.home_tips_card)
     tips_layout.setContentsMargins(16, 14, 16, 14)
     tips_layout.setSpacing(8)
@@ -147,6 +159,7 @@ def build_home_page(window) -> None:
 def build_launch_page(window) -> None:
     window.launch_page = QtWidgets.QWidget()
     window.launch_page.setObjectName('launchPage')
+    window.launch_page.setProperty('page', True)
     launch_layout = QtWidgets.QVBoxLayout(window.launch_page)
     launch_layout.setContentsMargins(24, 24, 24, 24)
     launch_layout.setSpacing(16)
@@ -159,6 +172,7 @@ def build_launch_page(window) -> None:
     launch_layout.addWidget(window.launch_subtitle)
 
     window.launch_card = SimpleCardWidget()
+    _apply_glass_card_style(window.launch_card, blur_radius=20.0)
     launch_card_layout = QtWidgets.QVBoxLayout(window.launch_card)
     launch_card_layout.setContentsMargins(16, 12, 16, 16)
     launch_card_layout.setSpacing(10)
@@ -168,6 +182,7 @@ def build_launch_page(window) -> None:
     launch_card_layout.addWidget(HorizontalSeparator())
 
     launch_form_container = QtWidgets.QWidget()
+    launch_form_container.setStyleSheet('background: transparent;')
     launch_form = QtWidgets.QFormLayout(launch_form_container)
     launch_form.setVerticalSpacing(10)
     launch_form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -202,6 +217,7 @@ def build_launch_page(window) -> None:
 def build_profiles_page(window) -> None:
     window.profiles_page = QtWidgets.QWidget()
     window.profiles_page.setObjectName('profilesPage')
+    window.profiles_page.setProperty('page', True)
     profiles_outer = QtWidgets.QVBoxLayout(window.profiles_page)
     profiles_outer.setContentsMargins(0, 0, 0, 0)
     profiles_outer.setSpacing(0)
@@ -224,7 +240,7 @@ def build_profiles_page(window) -> None:
     root_layout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetNoConstraint)
 
     left_panel = QtWidgets.QWidget()
-    left_panel.setStyleSheet('background: transparent;')
+    _apply_glass_card_style(left_panel, blur_radius=15.0)
     left_layout = QtWidgets.QVBoxLayout(left_panel)
     left_layout.setContentsMargins(12, 12, 12, 12)
     left_layout.setSpacing(12)
@@ -235,6 +251,12 @@ def build_profiles_page(window) -> None:
 
     window.profile_list = ListWidget()
     window.profile_list.currentItemChanged.connect(window._on_profile_selected)
+    window.profile_list.setStyleSheet(
+        'background-color: rgba(0, 0, 0, 50);'
+        'border: 1px solid rgba(255, 255, 255, 20);'
+        'border-radius: 12px;'
+        'padding: 8px;'
+    )
 
     list_scroll = ScrollArea()
     list_scroll.setWidgetResizable(True)
@@ -276,7 +298,7 @@ def build_profiles_page(window) -> None:
     root_layout.addWidget(left_panel, 1)
 
     right_panel = QtWidgets.QWidget()
-    right_panel.setStyleSheet('background: transparent;')
+    _apply_glass_card_style(right_panel, blur_radius=15.0)
     right_layout = QtWidgets.QVBoxLayout(right_panel)
     right_layout.setContentsMargins(0, 0, 0, 0)
     right_layout.setSpacing(0)
@@ -303,10 +325,12 @@ def build_profiles_page(window) -> None:
 
     window.details_card = SimpleCardWidget()
     window.details_card.setObjectName('detailsCard')
+    _apply_glass_card_style(window.details_card, blur_radius=15.0)
     details_layout = QtWidgets.QVBoxLayout(window.details_card)
     details_layout.setContentsMargins(16, 12, 16, 16)
     details_layout.setSpacing(10)
     details_form_container = QtWidgets.QWidget()
+    details_form_container.setStyleSheet('background: transparent;')
     form = QtWidgets.QFormLayout(details_form_container)
     form.setVerticalSpacing(10)
     form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -350,11 +374,13 @@ def build_profiles_page(window) -> None:
     config_layout.addWidget(window.extra_header)
 
     window.extra_card = SimpleCardWidget()
+    _apply_glass_card_style(window.extra_card, blur_radius=15.0)
     extra_layout = QtWidgets.QVBoxLayout(window.extra_card)
     extra_layout.setContentsMargins(16, 12, 16, 16)
     extra_layout.setSpacing(10)
 
     window.extra_form_container = QtWidgets.QWidget()
+    window.extra_form_container.setStyleSheet('background: transparent;')
     window.extra_form = QtWidgets.QFormLayout(window.extra_form_container)
     window.extra_form.setVerticalSpacing(10)
     window.extra_form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -368,6 +394,7 @@ def build_profiles_page(window) -> None:
 def build_settings_page(window) -> None:
     window.settings_page = QtWidgets.QWidget()
     window.settings_page.setObjectName('settingsPage')
+    window.settings_page.setProperty('page', True)
     settings_layout = QtWidgets.QVBoxLayout(window.settings_page)
     settings_layout.setContentsMargins(24, 24, 24, 24)
     settings_layout.setSpacing(16)
@@ -380,6 +407,7 @@ def build_settings_page(window) -> None:
     settings_layout.addWidget(window.settings_subtitle)
 
     window.settings_card = SimpleCardWidget()
+    _apply_glass_card_style(window.settings_card, blur_radius=20.0)
     settings_card_layout = QtWidgets.QVBoxLayout(window.settings_card)
     settings_card_layout.setContentsMargins(16, 12, 16, 16)
     settings_card_layout.setSpacing(10)
@@ -387,6 +415,7 @@ def build_settings_page(window) -> None:
     settings_card_layout.addWidget(window.settings_group_title)
     settings_card_layout.addWidget(HorizontalSeparator())
     settings_form_container = QtWidgets.QWidget()
+    settings_form_container.setStyleSheet('background: transparent;')
     settings_form = QtWidgets.QFormLayout(settings_form_container)
     settings_form.setVerticalSpacing(10)
     settings_form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -413,6 +442,7 @@ def build_settings_page(window) -> None:
 def build_onboarding_page(window) -> None:
     window.onboarding_page = QtWidgets.QWidget()
     window.onboarding_page.setObjectName('onboardingPage')
+    window.onboarding_page.setProperty('page', True)
     layout = QtWidgets.QVBoxLayout(window.onboarding_page)
     layout.setContentsMargins(32, 32, 32, 32)
     layout.setSpacing(16)
@@ -422,6 +452,7 @@ def build_onboarding_page(window) -> None:
     layout.addWidget(window.onboarding_stack, 1)
 
     welcome_page = QtWidgets.QWidget()
+    welcome_page.setStyleSheet('background: transparent;')
     welcome_layout = QtWidgets.QVBoxLayout(welcome_page)
     welcome_layout.setContentsMargins(0, 0, 0, 0)
     welcome_layout.setSpacing(12)
@@ -433,6 +464,7 @@ def build_onboarding_page(window) -> None:
     welcome_layout.addStretch(1)
 
     install_page = QtWidgets.QWidget()
+    install_page.setStyleSheet('background: transparent;')
     install_layout = QtWidgets.QVBoxLayout(install_page)
     install_layout.setContentsMargins(0, 0, 0, 0)
     install_layout.setSpacing(12)
@@ -442,10 +474,12 @@ def build_onboarding_page(window) -> None:
     window.onboarding_install_desc.setWordWrap(True)
     install_layout.addWidget(window.onboarding_install_desc)
     install_card = SimpleCardWidget()
+    _apply_glass_card_style(install_card, blur_radius=20.0)
     install_card_layout = QtWidgets.QVBoxLayout(install_card)
     install_card_layout.setContentsMargins(16, 12, 16, 16)
     install_card_layout.setSpacing(10)
     form_container = QtWidgets.QWidget()
+    form_container.setStyleSheet('background: transparent;')
     form = QtWidgets.QFormLayout(form_container)
     form.setVerticalSpacing(10)
     form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -470,6 +504,7 @@ def build_onboarding_page(window) -> None:
     install_layout.addStretch(1)
 
     init_page = QtWidgets.QWidget()
+    init_page.setStyleSheet('background: transparent;')
     init_layout = QtWidgets.QVBoxLayout(init_page)
     init_layout.setContentsMargins(0, 0, 0, 0)
     init_layout.setSpacing(12)
@@ -508,6 +543,7 @@ def build_onboarding_page(window) -> None:
 def build_browser_library_page(window) -> None:
     window.browser_library_page = QtWidgets.QWidget()
     window.browser_library_page.setObjectName('browserLibraryPage')
+    window.browser_library_page.setProperty('page', True)
     layout = QtWidgets.QVBoxLayout(window.browser_library_page)
     layout.setContentsMargins(24, 24, 24, 24)
     layout.setSpacing(16)
@@ -529,6 +565,7 @@ def build_browser_library_page(window) -> None:
     layout.addLayout(header_row)
 
     window.browser_library_card = SimpleCardWidget()
+    _apply_glass_card_style(window.browser_library_card, blur_radius=20.0)
     card_layout = QtWidgets.QVBoxLayout(window.browser_library_card)
     card_layout.setContentsMargins(16, 12, 16, 16)
     card_layout.setSpacing(10)
@@ -540,6 +577,12 @@ def build_browser_library_page(window) -> None:
     window.browser_library_list = ListWidget()
     window.browser_library_list.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
     window.browser_library_list.customContextMenuRequested.connect(window._show_browser_library_menu)
+    window.browser_library_list.setStyleSheet(
+        'background-color: rgba(0, 0, 0, 50);'
+        'border: 1px solid rgba(255, 255, 255, 20);'
+        'border-radius: 12px;'
+        'padding: 8px;'
+    )
     card_layout.addWidget(window.browser_library_list, 1)
 
     action_row = QtWidgets.QHBoxLayout()
@@ -556,6 +599,7 @@ def build_browser_library_page(window) -> None:
 def build_install_browser_page(window) -> None:
     window.install_browser_page = QtWidgets.QWidget()
     window.install_browser_page.setObjectName('installBrowserPage')
+    window.install_browser_page.setProperty('page', True)
     layout = QtWidgets.QVBoxLayout(window.install_browser_page)
     layout.setContentsMargins(24, 24, 24, 24)
     layout.setSpacing(16)
@@ -569,6 +613,7 @@ def build_install_browser_page(window) -> None:
     layout.addWidget(window.install_browser_subtitle)
 
     window.install_browser_card = SimpleCardWidget()
+    _apply_glass_card_style(window.install_browser_card, blur_radius=20.0)
     card_layout = QtWidgets.QVBoxLayout(window.install_browser_card)
     card_layout.setContentsMargins(16, 12, 16, 16)
     card_layout.setSpacing(10)
@@ -578,6 +623,7 @@ def build_install_browser_page(window) -> None:
     card_layout.addWidget(HorizontalSeparator())
 
     form_container = QtWidgets.QWidget()
+    form_container.setStyleSheet('background: transparent;')
     form = QtWidgets.QFormLayout(form_container)
     form.setVerticalSpacing(10)
     form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
