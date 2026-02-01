@@ -1,7 +1,7 @@
 [project]
 name = "uselessbrowser"
 version = "0.1.0"
-description = "Add your description here"
+description = "基于 PyQt6 + Fluent UI 的指纹浏览器工作台"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
